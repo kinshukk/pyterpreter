@@ -43,10 +43,29 @@ class Scanner:
             '>': DoubleToken(TokenType.GREATER, TokenType.GREATER_EQUAL),
         }
 
+        self.keywords = {
+            "and": TokenType.AND,
+            "class": TokenType.CLASS,
+            "else": TokenType.ELSE,
+            "false": TokenType.FALSE,
+            "for": TokenType.FOR,
+            "fun": TokenType.FUN,
+            "if": TokenType.IF,
+            "nil": TokenType.NIL,
+            "or": TokenType.OR,
+            "print": TokenType.PRINT,
+            "return": TokenType.RETURN,
+            "super": TokenType.SUPER,
+            "this": TokenType.THIS,
+            "true": TokenType.TRUE,
+            "var": TokenType.VAR,
+            "while": TokenType.WHILE
+        }
+
     def _isAtEnd(self) -> bool:
         return self._current >= len(self.source)
 
-    def scanTokens() -> List[Token]:
+    def scanTokens(self) -> List[Token]:
         while not self._isAtEnd():
             self._start = self._current
             self.scanToken()
@@ -71,10 +90,7 @@ class Scanner:
         self._current += 1
         return True
 
-    def addToken(self, tokentype: TokenType):
-        self.addToken(tokentype, None)
-
-    def addToken(self, tokentype: TokenType, literal):
+    def addToken(self, tokentype: TokenType, literal=None):
         text = self.source[self._start: self._current]
         self.tokens.append(Token(tokentype, text, literal, self._line))
 
@@ -83,7 +99,7 @@ class Scanner:
         if self._isAtEnd():
             return "\0"
 
-        return self.source[current]
+        return self.source[self._current]
 
     def _string(self):
         #find nearest ending doublequote
@@ -103,6 +119,42 @@ class Scanner:
         self.addToken(self.source[self._start + 1: self._current - 1])
 
         #TODO: escape sequences
+
+    def peekNext(self):
+        if self._current + 1 >= len(self.source):
+            return '\0'
+        return self.source[self._current + 1]
+
+    def number(self):
+        '''
+        Consume numbers without trailing decimal points
+            Fine: 123, 1234.5678
+            Not fine: 456.
+        '''
+        while self.peek().isdigit():
+            self.advance()
+
+        if self.peek() == '.' and self.peekNext().isdigit():
+            advance()
+
+        while self.peek().isdigit():
+            self.advance()
+
+        self.addToken(TokenType.NUMBER, float(self.source[self._start: self._current]))
+
+    def identifier(self):
+        while self.peek().isalnum():
+            self.advance()
+
+        text = self.source[self._start: self._current]
+        tokentype = None
+
+        if text in self.keywords.keys():
+            tokentype = self.keywords[text]
+        else:
+            tokentype = TokenType.IDENTIFIER
+
+        self.addToken(tokentype)
 
     def scanToken(self):
         c = self.advance()
@@ -138,5 +190,12 @@ class Scanner:
             self._string()
 
         else:
-            self.error_handler.error(self._line, f"Unexpected character {c}")
+            if c.isdigit():
+                self.number()
+
+            elif c.isalpha():
+                self.identifier()
+
+            else:
+                self.error_handler.error(self._line, f"Unexpected character {c}")
 

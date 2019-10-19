@@ -1,6 +1,7 @@
 import sys
 
 from ErrorHandler import *
+from scanner import *
 
 #error codes are used according to 
 #   https://www.freebsd.org/cgi/man.cgi?query=sysexits&apropos=0&sektion=0&manpath=FreeBSD+4.3-RELEASE&format=html
@@ -10,7 +11,15 @@ class Preter:
         self.error_handler = ErrorHandler()
 
     def run(self, program):
-        print("Running: \n{}".format(program))
+        #print("Running: \n{}".format(program))
+
+        scanner = Scanner(program, self.error_handler)
+
+        tokens = scanner.scanTokens()
+
+        #show all tokens for now
+        for token in tokens:
+            print(token)
 
     def runFile(self, filename):
         with open(filename, mode='r', encoding='utf-8') as f:

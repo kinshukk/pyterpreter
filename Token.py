@@ -4,12 +4,12 @@ class Token(object):
     def __init__(self, tokentype: int, lexeme: str, literal: object, line: int):
         self.tokentype = tokentype
         self.lexeme = lexeme
-        this.literal = literal
-        this.line = line
+        self.literal = literal
+        self.line = line
 
     def toString(self) -> str:
-        return "{} {} {}".format(this.type, this.lexeme, this.literal)
+        return f"{self.tokentype} {self.lexeme}\t{self.line}"
 
     def __str__(self):
-        return "<Token> {}".format(this.toString())
+        return "<Token> {}".format(self.toString())
 
