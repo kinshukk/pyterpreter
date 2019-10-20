@@ -156,6 +156,20 @@ class Scanner:
 
         self.addToken(tokentype)
 
+    def multilineComment(self):
+        while self.peek() != '\0' and self.peekNext() != '\0':
+            if self.match('\n'):
+                self._line += 1
+            elif self.peek() == '*' and self.peekNext() == '/':
+                #get out only if comment ends
+                self.advance()
+                self.advance()
+                return
+            else:
+                self.advance()
+        
+        self.error_handler.error(self._line, "Unexpected EOF: Multiline comment didn't end")
+
     def scanToken(self):
         c = self.advance()
         
@@ -174,9 +188,13 @@ class Scanner:
             if self.match('/'):
                 while self.peek() != "\n" and not self._isAtEnd():
                     self.advance()
+
+            elif self.match("*"):
+                self.multilineComment()
+
             else:
                 self.addToken(TokenType.SLASH)
-        
+
         elif c == ' ' or c == '\r' or c == '\t':
             #skip whitespace
             pass
