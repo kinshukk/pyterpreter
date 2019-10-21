@@ -36,6 +36,7 @@ class AstPrinter(Visitor):
     def visitUnaryExpr(self, expr: Unary) -> str:
         return self.parenthesize(expr.operator.lexeme, expr.right)
 
+#see if this even works
 if __name__ == "__main__":
     expression = Binary(
         Unary(
@@ -50,4 +51,6 @@ if __name__ == "__main__":
 
     printer = AstPrinter()
 
+    #should print
+    #(* (- 42) (group 3.14159))
     print(printer.print(expression))
