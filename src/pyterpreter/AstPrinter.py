@@ -17,7 +17,7 @@ class AstPrinter(Visitor):
         for expr in args:
             res += f" {expr.accept(self)}"
 
-        res += ")"
+        res += " )"
 
         return res
 

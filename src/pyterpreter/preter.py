@@ -2,6 +2,8 @@ import sys
 
 from ErrorHandler import *
 from scanner import *
+from Parser import *
+from AstPrinter import *
 
 #error codes are used according to 
 #   https://www.freebsd.org/cgi/man.cgi?query=sysexits&apropos=0&sektion=0&manpath=FreeBSD+4.3-RELEASE&format=html
@@ -17,10 +19,13 @@ class Preter:
 
         tokens = scanner.scanTokens()
 
-        #show all tokens for now
-        print("Type\t\tlexeme\tliteral\tline")
-        for token in tokens:
-            print(token)
+        parser = Parser(tokens, self.error_handler)
+        expression = parser.parse()
+
+        if self.error_handler.hadError:
+            return
+
+        print(AstPrinter().print(expression))
 
     def runFile(self, filename):
         with open(filename, mode='r', encoding='utf-8') as f:
