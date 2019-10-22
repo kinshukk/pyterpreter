@@ -65,9 +65,31 @@ class Parser:
                 return True
 
         return False
+        
+    def commaSeparated(self) -> Expr:
+        '''
+            commaSeparated -> expression ( "," expression )*
+        '''
+        left = self.expression()
+
+        while self.match([TokenType.COMMA]):
+            operator = self.previous()
+            right = self.expression()
+            left = Binary(left, operator, right)
+
+        return left
+
+    #TODO: Implement this
+    def ternary(self) -> Expr:
+        '''
+            TODO: Make this better
+            ternary -> ternary "?" ternary ":" ternary | expression
+        '''
+        pass
 
     def expression(self) -> Expr:
         return self.equality()
+
 
     def equality(self) -> Expr:
         '''
@@ -144,8 +166,9 @@ class Parser:
 
     def primary(self) -> Expr:
         '''
-            primary -> NUMBER | STRING | "false" | "true" | "nil" | "(" expression ")"
+            primary -> NUMBER | STRING | "false" | "true" | "nil" | "(" commaSeparated ")"
         '''
+        print(f"peek() : {self.peek()}")
         if self.match([TokenType.FALSE]):
             return Literal(False)
         if self.match([TokenType.TRUE]):
@@ -157,7 +180,7 @@ class Parser:
             return Literal(self.previous().literal)
 
         if self.match([TokenType.LEFT_PAREN]):
-            expr = self.expression()
+            expr = self.commaSeparated()
             self.consume(TokenType.RIGHT_PAREN, "Expected ')' after expression")
             return Grouping(expr)
 
@@ -186,8 +209,10 @@ class Parser:
             
             self.advance()
 
+    #TODO: BUG: parser fails for assignment like 1 = 2
+    #AstPrinter only prints 1, even though scanner can scan the tokens
     def parse(self):
         try:
-            return self.expression()
+            return self.commaSeparated()
         except Parser.ParseError as e:
             return None

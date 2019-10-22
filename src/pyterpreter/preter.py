@@ -12,6 +12,12 @@ class Preter:
     def __init__(self):
         self.error_handler = ErrorHandler()
 
+    def printTokens(self, tokens):
+        print(f"{'Type':<33} | {'lexeme':<10} | {'literal':<10} | line")
+        for token in tokens:
+            print(token)
+        print("\n")
+
     def run(self, program):
         #print("Running: \n{}".format(program))
 
@@ -19,12 +25,15 @@ class Preter:
 
         tokens = scanner.scanTokens()
 
+        self.printTokens(tokens)
+
         parser = Parser(tokens, self.error_handler)
         expression = parser.parse()
 
         if self.error_handler.hadError:
             return
 
+        print("AstPrinter expression:")
         print(AstPrinter().print(expression))
 
     def runFile(self, filename):

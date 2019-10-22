@@ -114,9 +114,9 @@ class Scanner:
             return
 
         #consume the closing doublequote
-        advance()
+        self.advance()
 
-        self.addToken(self.source[self._start + 1: self._current - 1])
+        self.addToken(TokenType.STRING, self.source[self._start + 1: self._current - 1])
 
         #TODO: escape sequences
 
