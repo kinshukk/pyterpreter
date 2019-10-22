@@ -168,7 +168,6 @@ class Parser:
         '''
             primary -> NUMBER | STRING | "false" | "true" | "nil" | "(" commaSeparated ")"
         '''
-        print(f"peek() : {self.peek()}")
         if self.match([TokenType.FALSE]):
             return Literal(False)
         if self.match([TokenType.TRUE]):
