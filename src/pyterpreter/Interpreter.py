@@ -30,6 +30,10 @@ class Interpreter(Visitor):
         elif typ_ == TokenType.SLASH:
             #TODO: Check Values? IEEE 754 rules?
             self.checkNumberOperands(expr.operator, left, right)
+            
+            if float(right) == 0.0:
+                raise RuntimeError_(expr.operator, "Divide by zero")
+
             return float(left) / float(right)
 
         elif typ_ == TokenType.STAR:

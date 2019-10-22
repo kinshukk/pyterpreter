@@ -20,7 +20,7 @@ class ErrorHandler:
         else:
             self.report(token.line, f" at {token.lexeme} ", message)
 
-    def runtimeError(error: RuntimeError_):
+    def runtimeError(self, error: RuntimeError_):
         print(f"{error.message}\n[line {error.token.line}]")
         self.hadRuntimeError = True
 
