@@ -1,4 +1,8 @@
+from typing import List
+
 from Expr import *
+from Stmt import *
+from Visitor import *
 from TokenType import *
 from ErrorHandler import *
 from RuntimeError_ import *
@@ -84,6 +88,15 @@ class Interpreter(Visitor):
         #Something's wrong/Unreachable
         return None
 
+    def visitExpressionStmt(self, stmt: Stmt):
+        self.evaluate(stmt.expression)
+        return None
+
+    def visitPrintStmt(self, stmt: Stmt):
+        value = self.evaluate(stmt.expression)
+        print(self.stringify(value))
+        return None
+
     def checkNumberOperands(self, operator: TokenType, *args):
         for arg in args:
             if not isinstance(arg, float):
@@ -103,11 +116,14 @@ class Interpreter(Visitor):
 
     def evaluate(self, expr: Expr):
         return expr.accept(self)
+    
+    def execute(self, stmt: Stmt):
+        stmt.accept(self)
 
-    def interpret(self, expression: Expr):
+    def interpret(self, statements: List[Stmt]):
         try:
-            value = self.evaluate(expression)
-            print(self.stringify(value))
+            for statement in statements:
+                self.execute(statement)
         except RuntimeError_ as e:
             self.error_handler.runtimeError(e)
     

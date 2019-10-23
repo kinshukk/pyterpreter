@@ -30,7 +30,7 @@ class Preter:
         #self.printTokens(tokens)
 
         parser = Parser(tokens, self.error_handler)
-        expression = parser.parse()
+        statements = parser.parse()
 
         if self.error_handler.hadError or self.error_handler.hadRuntimeError:
             return
@@ -38,7 +38,7 @@ class Preter:
         #print("AstPrinter expression:")
         #print(AstPrinter().print(expression))
 
-        self.interpreter.interpret(expression)
+        self.interpreter.interpret(statements)
 
     def runFile(self, filename):
         with open(filename, mode='r', encoding='utf-8') as f:

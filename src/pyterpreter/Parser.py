@@ -3,6 +3,7 @@ from typing import List
 from Token import *
 from TokenType import *
 from Expr import *
+from Stmt import *
 from ErrorHandler import *
 
 class Parser:
@@ -33,16 +34,6 @@ class Parser:
     def error(self, token: Token, message: str) -> ParseError:
         self.error_handler.errorOnToken(token, message)
         #Empty string for now
-        new_block_tokens = [
-            TokenType.CLASS,
-            TokenType.FUN,
-            TokenType.VAR,
-            TokenType.FOR,
-            TokenType.IF,
-            TokenType.WHILE,
-            TokenType.PRINT,
-            TokenType.RETURN
-        ]
         return Parser.ParseError("")
 
     def check(self, type_: TokenType) -> bool:
@@ -211,7 +202,31 @@ class Parser:
     #TODO: BUG: parser fails for assignment like 1 = 2
     #AstPrinter only prints 1, even though scanner can scan the tokens
     def parse(self):
-        try:
-            return self.commaSeparated()
-        except Parser.ParseError as e:
-            return None
+        '''
+            Convert list of tokens to a list of valid statements
+        
+            program -> statement* EOF
+        '''
+        statements = []
+
+        while not self.isAtEnd():
+            statements.append(self.statement())
+
+        return statements
+
+    def statement(self) -> Stmt:
+        if self.match([TokenType.PRINT]):
+            return self.printStatement()
+
+        return self.expressionStatement()
+
+    def printStatement(self) -> Stmt:
+        #Already consumed the 'print' token, so no need to do that here
+        value = self.expression()
+        self.consume(TokenType.SEMICOLON, "Expected ';' after print value")
+        return Print(value)
+
+    def expressionStatement(self) -> Stmt:
+        expr = self.expression()
+        self.consume(TokenType.SEMICOLON, "Expected ';' after expression")
+        return Expression(expr)

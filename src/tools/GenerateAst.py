@@ -22,22 +22,25 @@ def defineType(outf, base_name: str, class_name: str, fields: str):
 
     field_list = fields.split(",")
     for field in field_list:
-        field_name = field.split(":")[0].strip()
-        outf.write(f"        self.{field_name} = {field_name}\n")
+        #field_name = field.split(":")[0].strip()
+        outf.write(f"        self.{field} = {field}\n")
 
     outf.write("\n")
     outf.write(f"    def accept(self, visitor):\n")
     outf.write(f"        return visitor.visit{class_name}{base_name}(self)\n")
 
-def defineVisitor(outf, base_name: str, types_: List[str]):
-    outf.write("\nclass Visitor(ABC):\n")
+def addVisitorLines(base_name: str, types_: List[str], visitorLines: List[str]):
+    #outf.write("\nclass Visitor(ABC):\n")
+    
+    #add import at the beginning of visitorLines
+    visitorLines.insert(0, f"from {base_name} import *\n")
 
     for type_ in types_:
         type_name = type_.split("|")[0].strip()
 
-        outf.write(f"    @abstractmethod\n")
-        outf.write(f"    def visit{type_name}{base_name}(self, {base_name.lower()}: {type_name}):\n")
-        outf.write(f"        pass\n\n")
+        visitorLines.append(f"    @abstractmethod\n")
+        visitorLines.append(f"    def visit{type_name}{base_name}(self, {base_name.lower()}: {type_name}):\n")
+        visitorLines.append(f"        pass\n\n")
 
 def defineBaseClass(outf, base_name: str):
     outf.write(f"class {base_name}:\n")
@@ -54,7 +57,7 @@ def defineExprClasses(outf, base_name: str, types_: List[str]):
         defineType(outf, base_name, class_name, fields)
     
 
-def defineAst(output_dir: str, base_name: str, types_: List[str]):
+def defineAst(output_dir: str, base_name: str, types_: List[str], visitorLines: List[str]):
     path = f"{output_dir}/{base_name}.py"
 
     print(f"path: {path}")
@@ -67,7 +70,20 @@ def defineAst(output_dir: str, base_name: str, types_: List[str]):
 
     defineExprClasses(output_file, base_name, types_)
 
-    defineVisitor(output_file, base_name, types_)
+    addVisitorLines(base_name, types_, visitorLines)
+
+def visitorImports(outf):
+    defineImports(outf)
+
+def defineVisitor(output_dir: str, visitorLines: List[str]):
+    outf = open(f"{output_dir}/Visitor.py", mode="w+", encoding="utf-8")
+
+    visitorImports(outf)
+
+    for line in visitorLines:
+        outf.write(line)
+
+    outf.close()
 
 def main():
     if len(sys.argv) != 2:
@@ -75,15 +91,27 @@ def main():
         sys.exit(1)
 
     output_dir = sys.argv[1]
+    visitorLines = ["\nclass Visitor(ABC):\n"]
 
     defineAst(output_dir, 
               "Expr",
               [
-                "Binary | left: Expr, operator: Token, right: Expr",
-                "Grouping | expression: Expr",
+                "Binary | left, operator, right",
+                "Grouping | expression",
                 "Literal | value",
-                "Unary | operator: Token, right: Expr"
-              ])
+                "Unary | operator, right"
+              ],
+              visitorLines)
+    
+    defineAst(output_dir,
+              "Stmt",
+              [
+                  "Expression | expression",
+                  "Print | expression"
+              ],
+              visitorLines)
+
+    defineVisitor(output_dir, visitorLines)
 
 if __name__ == '__main__':
    main() 

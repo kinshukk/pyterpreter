@@ -6,16 +6,16 @@ class Expr:
 
 
 class Binary(Expr):
-    def __init__(self, left: Expr, operator: Token, right: Expr):
+    def __init__(self, left, operator, right):
         self.left = left
-        self.operator = operator
-        self.right = right
+        self. operator =  operator
+        self. right =  right
 
     def accept(self, visitor):
         return visitor.visitBinaryExpr(self)
 
 class Grouping(Expr):
-    def __init__(self, expression: Expr):
+    def __init__(self, expression):
         self.expression = expression
 
     def accept(self, visitor):
@@ -29,27 +29,9 @@ class Literal(Expr):
         return visitor.visitLiteralExpr(self)
 
 class Unary(Expr):
-    def __init__(self, operator: Token, right: Expr):
+    def __init__(self, operator, right):
         self.operator = operator
-        self.right = right
+        self. right =  right
 
     def accept(self, visitor):
         return visitor.visitUnaryExpr(self)
-
-class Visitor(ABC):
-    @abstractmethod
-    def visitBinaryExpr(self, expr: Binary):
-        pass
-
-    @abstractmethod
-    def visitGroupingExpr(self, expr: Grouping):
-        pass
-
-    @abstractmethod
-    def visitLiteralExpr(self, expr: Literal):
-        pass
-
-    @abstractmethod
-    def visitUnaryExpr(self, expr: Unary):
-        pass
-

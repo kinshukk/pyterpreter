@@ -1,6 +1,9 @@
 from Expr import *
+from Stmt import *
+from Visitor import *
 from Token import *
 from TokenType import *
+
 
 #TODO: But how does ABC work?
 
@@ -35,6 +38,14 @@ class AstPrinter(Visitor):
 
     def visitUnaryExpr(self, expr: Unary) -> str:
         return self.parenthesize(expr.operator.lexeme, expr.right)
+
+    #TODO:
+    def visitExpressionStatement(self, stmt: Stmt):
+        return None
+
+    #TODO:
+    def visitPrintStatement(self, stmt: Stmt):
+        return None
 
 #see if this even works
 if __name__ == "__main__":
