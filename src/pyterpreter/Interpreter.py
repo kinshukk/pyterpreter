@@ -6,10 +6,12 @@ from Visitor import *
 from TokenType import *
 from ErrorHandler import *
 from RuntimeError_ import *
+from Environment import *
 
 class Interpreter(Visitor):
     def __init__(self, error_handler: ErrorHandler):
         self.error_handler = error_handler
+        self.environment = Environment()
 
     def visitBinaryExpr(self, expr: Binary):
         left = self.evaluate(expr.left)
@@ -88,6 +90,9 @@ class Interpreter(Visitor):
         #Something's wrong/Unreachable
         return None
 
+    def visitAssignExpr(self, expr: Assign):
+        pass
+
     def visitExpressionStmt(self, stmt: Stmt):
         self.evaluate(stmt.expression)
         return None
@@ -96,6 +101,20 @@ class Interpreter(Visitor):
         value = self.evaluate(stmt.expression)
         print(self.stringify(value))
         return None
+
+    def visitVarStmt(self, stmt: Var):
+        value = None
+        
+        if stmt.initializer != None:
+            value = self.evaluate(stmt.initializer)
+
+        #variable initializes to 'null' by default
+        #TODO: maybe change this to give an error for undefined vars
+        self.environment.define(stmt.name.lexeme, value)
+        return None
+
+    def visitVariableExpr(self, expr: Variable):
+        return self.environment.get(expr.name)
 
     def checkNumberOperands(self, operator: TokenType, *args):
         for arg in args:

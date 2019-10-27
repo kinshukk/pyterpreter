@@ -2,9 +2,9 @@ import sys
 from typing import List
 
 '''
-    Generates the file src/pyterpreter/Expr.py
+    Generates AST-related files, like src/pyterpreter/Expr.py, src/pyterpreter/Visitor.py
 
-    We can add new Expr types by adding lines to the list passed to defineAst() inside main()
+    We can add new types by adding lines to the list passed to defineAst() inside main()
 '''
 
 def defineImports(outf):
@@ -29,6 +29,7 @@ def defineType(outf, base_name: str, class_name: str, fields: str):
     outf.write(f"    def accept(self, visitor):\n")
     outf.write(f"        return visitor.visit{class_name}{base_name}(self)\n")
 
+
 def addVisitorLines(base_name: str, types_: List[str], visitorLines: List[str]):
     #outf.write("\nclass Visitor(ABC):\n")
     
@@ -41,6 +42,7 @@ def addVisitorLines(base_name: str, types_: List[str], visitorLines: List[str]):
         visitorLines.append(f"    @abstractmethod\n")
         visitorLines.append(f"    def visit{type_name}{base_name}(self, {base_name.lower()}: {type_name}):\n")
         visitorLines.append(f"        pass\n\n")
+
 
 def defineBaseClass(outf, base_name: str):
     outf.write(f"class {base_name}:\n")
@@ -60,8 +62,6 @@ def defineExprClasses(outf, base_name: str, types_: List[str]):
 def defineAst(output_dir: str, base_name: str, types_: List[str], visitorLines: List[str]):
     path = f"{output_dir}/{base_name}.py"
 
-    print(f"path: {path}")
-
     output_file = open(path, mode='w+', encoding="utf-8")
     
     defineImports(output_file)
@@ -72,8 +72,12 @@ def defineAst(output_dir: str, base_name: str, types_: List[str], visitorLines: 
 
     addVisitorLines(base_name, types_, visitorLines)
 
+    print(f"[written]: {path}")
+
+
 def visitorImports(outf):
     defineImports(outf)
+
 
 def defineVisitor(output_dir: str, visitorLines: List[str]):
     outf = open(f"{output_dir}/Visitor.py", mode="w+", encoding="utf-8")
@@ -84,6 +88,9 @@ def defineVisitor(output_dir: str, visitorLines: List[str]):
         outf.write(line)
 
     outf.close()
+
+    print(f"[written]: {output_dir}/Visitor.py")
+
 
 def main():
     if len(sys.argv) != 2:
@@ -96,20 +103,25 @@ def main():
     defineAst(output_dir, 
               "Expr",
               [
+                "Assign | name, value",
                 "Binary | left, operator, right",
                 "Grouping | expression",
                 "Literal | value",
-                "Unary | operator, right"
+                "Unary | operator, right",
+                "Variable | name"
               ],
-              visitorLines)
+              visitorLines
+    )
     
     defineAst(output_dir,
               "Stmt",
               [
                   "Expression | expression",
-                  "Print | expression"
+                  "Print | expression",
+                  "Var | name, initializer"
               ],
-              visitorLines)
+              visitorLines
+    )
 
     defineVisitor(output_dir, visitorLines)
 

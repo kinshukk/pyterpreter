@@ -20,12 +20,17 @@ class Preter:
             print(token)
         print("\n")
 
-    def run(self, program):
+    def run(self, program, debug=False):
         #print("Running: \n{}".format(program))
 
         scanner = Scanner(program, self.error_handler)
 
         tokens = scanner.scanTokens()
+
+        if debug:
+            print("Tokens:")
+            for token in tokens:
+                print(token)
 
         #self.printTokens(tokens)
 
@@ -53,11 +58,12 @@ class Preter:
         try:
             while True:
                 print(">>>", end="")
-                self.run(input())
+                self.run(input(), debug=True)
 
                 #error shouldn't kill the interactive prompt
                 self.error_handler.hadError = False
-        
+                self.error_handler.hadRuntimeError = False
+
         except KeyboardInterrupt:
             print("\nKeyboardInterrupt")
 

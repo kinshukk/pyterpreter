@@ -5,6 +5,14 @@ class Expr:
     pass
 
 
+class Assign(Expr):
+    def __init__(self, name, value):
+        self.name = name
+        self. value =  value
+
+    def accept(self, visitor):
+        return visitor.visitAssignExpr(self)
+
 class Binary(Expr):
     def __init__(self, left, operator, right):
         self.left = left
@@ -35,3 +43,10 @@ class Unary(Expr):
 
     def accept(self, visitor):
         return visitor.visitUnaryExpr(self)
+
+class Variable(Expr):
+    def __init__(self, name):
+        self.name = name
+
+    def accept(self, visitor):
+        return visitor.visitVariableExpr(self)

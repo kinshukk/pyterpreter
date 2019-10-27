@@ -6,6 +6,10 @@ from Expr import *
 
 class Visitor(ABC):
     @abstractmethod
+    def visitAssignExpr(self, expr: Assign):
+        pass
+
+    @abstractmethod
     def visitBinaryExpr(self, expr: Binary):
         pass
 
@@ -22,10 +26,18 @@ class Visitor(ABC):
         pass
 
     @abstractmethod
+    def visitVariableExpr(self, expr: Variable):
+        pass
+
+    @abstractmethod
     def visitExpressionStmt(self, stmt: Expression):
         pass
 
     @abstractmethod
     def visitPrintStmt(self, stmt: Print):
+        pass
+
+    @abstractmethod
+    def visitVarStmt(self, stmt: Var):
         pass
 

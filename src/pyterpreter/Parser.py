@@ -79,12 +79,15 @@ class Parser:
         pass
 
     def expression(self) -> Expr:
+        '''
+            expression -> assignment
+        '''
         return self.equality()
 
 
     def equality(self) -> Expr:
         '''
-            equality -> comparison ( ('!' | '-') comparison )* 
+            equality -> comparison ( ('!=' | '==') comparison )* 
         '''
         #consume left comparison
         left = self.comparison()
@@ -149,6 +152,9 @@ class Parser:
             return self.primary()
 
     def consume(self, type_: TokenType, message: str) -> Token:
+        '''
+            Used when we expect a given token type "type_". Raises error when not found
+        '''
         if self.check(type_):
             return self.advance()
 
@@ -157,7 +163,13 @@ class Parser:
 
     def primary(self) -> Expr:
         '''
-            primary -> NUMBER | STRING | "false" | "true" | "nil" | "(" commaSeparated ")"
+            primary -> NUMBER
+                     | STRING 
+                     | "false" 
+                     | "true" 
+                     | "nil" 
+                     | "(" commaSeparated ")" 
+                     | IDENTIFIER
         '''
         if self.match([TokenType.FALSE]):
             return Literal(False)
@@ -174,9 +186,12 @@ class Parser:
             self.consume(TokenType.RIGHT_PAREN, "Expected ')' after expression")
             return Grouping(expr)
 
+        if self.match([TokenType.IDENTIFIER]):
+            return Variable(self.previous())
+
         raise self.error(self.peek(), "Expected expression")
 
-    def synchronize():
+    def synchronize(self):
         self.advance()
         new_block_tokens = [
             TokenType.CLASS,
@@ -205,28 +220,66 @@ class Parser:
         '''
             Convert list of tokens to a list of valid statements
         
-            program -> statement* EOF
+            program -> declaration* EOF
         '''
         statements = []
 
         while not self.isAtEnd():
-            statements.append(self.statement())
+            statements.append(self.declaration())
 
         return statements
 
+    def declaration(self) -> Stmt:
+        '''
+            declaration -> variableDeclaration | statement;
+        '''
+        try:
+            if self.match([TokenType.VAR]):
+                return self.varDeclaration()
+            else:
+                return self.statement()
+        except Parser.ParseError as e:
+            self.synchronize()
+            return None
+
+    def varDeclaration(self) -> Stmt:
+        '''
+            variableDeclaration -> 'var' IDENTIFIER ('=' expression)? ';'
+
+            'var' assumed to have been consumed already by caller
+        '''
+        name = self.consume(TokenType.IDENTIFIER, "Expected variable name")
+
+        initializer = None
+        if self.match([TokenType.EQUAL]):
+            initializer = self.expression()
+
+        self.consume(TokenType.SEMICOLON, "Expected ';' after variable declaration")
+
+        return Var(name, initializer)
+
     def statement(self) -> Stmt:
+        '''
+            statement -> expressionStatement | printStatement
+        '''
         if self.match([TokenType.PRINT]):
             return self.printStatement()
 
         return self.expressionStatement()
 
     def printStatement(self) -> Stmt:
+        '''
+            printStatement -> 'print' expression ';'
+        '''
         #Already consumed the 'print' token, so no need to do that here
         value = self.expression()
         self.consume(TokenType.SEMICOLON, "Expected ';' after print value")
         return Print(value)
 
     def expressionStatement(self) -> Stmt:
+        '''
+            expressionStatement -> expression ';'
+        '''
         expr = self.expression()
         self.consume(TokenType.SEMICOLON, "Expected ';' after expression")
         return Expression(expr)
