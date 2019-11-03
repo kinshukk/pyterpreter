@@ -91,7 +91,9 @@ class Interpreter(Visitor):
         return None
 
     def visitAssignExpr(self, expr: Assign):
-        pass
+        value = self.evaluate(expr.value)
+        self.environment.assign(expr.name, value)
+        return value
 
     def visitExpressionStmt(self, stmt: Stmt):
         self.evaluate(stmt.expression)

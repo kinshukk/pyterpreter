@@ -11,7 +11,8 @@ class Parser:
         def __init__(self, message):
             super().__init__(message)
 
-    def __init__(self, tokens: List[Token], error_handler: ErrorHandler):
+    def __init__(self, tokens: List[Token], error_handler: ErrorHandler, logging: bool=False):
+        self.logging = logging
         self.tokens = tokens
         self.current = 0
         self.error_handler = error_handler
@@ -53,22 +54,14 @@ class Parser:
         for type_ in types:
             if self.check(type_):
                 self.advance()
+                
+                if self.logging:
+                    print(f"Matched {self.previous()}")
+
                 return True
 
         return False
         
-    def commaSeparated(self) -> Expr:
-        '''
-            commaSeparated -> expression ( "," expression )*
-        '''
-        left = self.expression()
-
-        while self.match([TokenType.COMMA]):
-            operator = self.previous()
-            right = self.expression()
-            left = Binary(left, operator, right)
-
-        return left
 
     #TODO: Implement this
     def ternary(self) -> Expr:
@@ -80,10 +73,39 @@ class Parser:
 
     def expression(self) -> Expr:
         '''
-            expression -> assignment
+            expression -> commaSeparated
         '''
-        return self.equality()
+        return self.commaSeparated()
+    
+    def commaSeparated(self) -> Expr:
+        '''
+            commaSeparated -> assignment ( "," assignment )*
+        '''
+        left = self.assignment()
 
+        while self.match([TokenType.COMMA]):
+            operator = self.previous()
+            right = self.assignment()
+            left = Binary(left, operator, right)
+
+        return left
+
+    def assignment(self) -> Expr:
+        '''
+            assignment -> IDENTIFIER '=' assignment | equality
+        '''
+        expr = self.equality()
+
+        if self.match([TokenType.EQUAL]):
+            equals = self.previous()
+            value = self.assignment()
+
+            if isinstance(expr, Variable):
+                return Assign(expr.name, value)
+
+            self.error(equals, "Invalid target for assignment")
+
+        return expr
 
     def equality(self) -> Expr:
         '''
@@ -156,6 +178,11 @@ class Parser:
             Used when we expect a given token type "type_". Raises error when not found
         '''
         if self.check(type_):
+            if self.logging:
+                result = self.advance()
+                print(f"Consumed {result}")
+                return result
+
             return self.advance()
 
         raise self.error(self.peek(), message)

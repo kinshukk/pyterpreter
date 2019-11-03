@@ -1,0 +1,13 @@
+var a = 1;
+var b = 2;
+
+//3
+print a + b;
+
+var c = 1;
+
+//4
+print c = c + a + b;
+
+//6
+print b = (a = b + c);

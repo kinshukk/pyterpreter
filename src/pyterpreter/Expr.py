@@ -8,7 +8,7 @@ class Expr:
 class Assign(Expr):
     def __init__(self, name, value):
         self.name = name
-        self. value =  value
+        self.value = value
 
     def accept(self, visitor):
         return visitor.visitAssignExpr(self)
@@ -16,8 +16,8 @@ class Assign(Expr):
 class Binary(Expr):
     def __init__(self, left, operator, right):
         self.left = left
-        self. operator =  operator
-        self. right =  right
+        self.operator = operator
+        self.right = right
 
     def accept(self, visitor):
         return visitor.visitBinaryExpr(self)
@@ -39,7 +39,7 @@ class Literal(Expr):
 class Unary(Expr):
     def __init__(self, operator, right):
         self.operator = operator
-        self. right =  right
+        self.right = right
 
     def accept(self, visitor):
         return visitor.visitUnaryExpr(self)

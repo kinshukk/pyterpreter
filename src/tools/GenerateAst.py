@@ -23,6 +23,7 @@ def defineType(outf, base_name: str, class_name: str, fields: str):
     field_list = fields.split(",")
     for field in field_list:
         #field_name = field.split(":")[0].strip()
+        field = field.strip()
         outf.write(f"        self.{field} = {field}\n")
 
     outf.write("\n")

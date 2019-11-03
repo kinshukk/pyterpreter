@@ -54,11 +54,11 @@ class Preter:
             if self.error_handler.hadRuntimeError:
                 sys.exit(70)
 
-    def runPrompt(self):
+    def runPrompt(self, debug=False):
         try:
             while True:
                 print(">>>", end="")
-                self.run(input(), debug=True)
+                self.run(input(), debug=debug)
 
                 #error shouldn't kill the interactive prompt
                 self.error_handler.hadError = False
