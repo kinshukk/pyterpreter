@@ -1,0 +1,26 @@
+var a = 1;
+var b = 2;
+
+//1
+print a;
+//2
+print b;
+
+{
+	var a = 10;
+	var b = b + 20;
+	
+	//10
+	print a;
+	//22
+	print b;
+
+	{
+		var a = a + b;
+		var b = a + b;
+		//32
+		print a;
+		//54
+		print b;
+	}
+}

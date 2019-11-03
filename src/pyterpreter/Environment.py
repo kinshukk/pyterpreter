@@ -2,8 +2,10 @@ from RuntimeError_ import *
 from Token import Token
 
 class Environment:
-    def __init__(self):
+    def __init__(self, enclosing=None):
         self.values = {}
+        self.enclosing = enclosing
+
 
     def define(self, name: str, value: object):
         '''
@@ -22,11 +24,20 @@ class Environment:
         if name.lexeme in self.values:
             return self.values[name.lexeme]
 
-        raise RuntimeError_(name, f"Undefined variable {name.lexeme}")
+        #look in higher up scopes
+        elif self.enclosing is not None:
+            return self.enclosing.get(name)
+        
+        else:
+            raise RuntimeError_(name, f"Undefined variable {name.lexeme}")
 
     def assign(self, name: Token, value: object):
         if name.lexeme in self.values:
             self.values[name.lexeme] = value
-            return
 
-        raise RuntimeError_(name, f"Undefined variable {name.lexeme}")
+        elif self.enclosing is not None:
+            self.enclosing.assign(name, value)
+            return
+        
+        else:
+            raise RuntimeError_(name, f"Undefined variable {name.lexeme}")

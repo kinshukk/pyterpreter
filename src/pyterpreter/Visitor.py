@@ -30,6 +30,10 @@ class Visitor(ABC):
         pass
 
     @abstractmethod
+    def visitBlockStmt(self, stmt: Block):
+        pass
+
+    @abstractmethod
     def visitExpressionStmt(self, stmt: Expression):
         pass
 

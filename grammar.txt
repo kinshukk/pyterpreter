@@ -8,11 +8,13 @@ declaration -> variableDeclaration | statement;
 
 variableDeclaration -> 'var' IDENTIFIER ('=' expression)? ';'
 
-statement -> expressionStatement | printStatement
+statement -> expressionStatement | printStatement | block
 
 printStatement -> 'print' expression ';'
 
 expressionStatement -> expression ';'
+
+block -> '{' declaration '}'
 
 
 

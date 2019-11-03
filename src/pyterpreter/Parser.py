@@ -39,7 +39,7 @@ class Parser:
 
     def check(self, type_: TokenType) -> bool:
         '''
-            Return True if current token is of type type_
+            Return True if current token is of type type_, without advancing
         '''
         if self.isAtEnd():
             return False
@@ -287,12 +287,16 @@ class Parser:
 
     def statement(self) -> Stmt:
         '''
-            statement -> expressionStatement | printStatement
+            statement -> expressionStatement | printStatement | block
         '''
         if self.match([TokenType.PRINT]):
             return self.printStatement()
 
-        return self.expressionStatement()
+        elif self.match([TokenType.LEFT_BRACE]):
+            return Block(self.block())
+
+        else:
+            return self.expressionStatement()
 
     def printStatement(self) -> Stmt:
         '''
@@ -310,3 +314,15 @@ class Parser:
         expr = self.expression()
         self.consume(TokenType.SEMICOLON, "Expected ';' after expression")
         return Expression(expr)
+
+    def block(self) -> List[Stmt]:
+        '''
+            block -> '{' declaration* '}'
+        '''
+        declarations = []
+
+        while (not self.check(TokenType.RIGHT_BRACE)) and not self.isAtEnd():
+            declarations.append(self.declaration())
+
+        self.consume(TokenType.RIGHT_BRACE, "Expected '}' after block")
+        return declarations

@@ -95,6 +95,11 @@ class Interpreter(Visitor):
         self.environment.assign(expr.name, value)
         return value
 
+
+    def visitBlockStmt(self, stmt: Stmt):
+        self.executeBlock(stmt.statements, Environment(enclosing=self.environment))
+        return None
+
     def visitExpressionStmt(self, stmt: Stmt):
         self.evaluate(stmt.expression)
         return None
@@ -153,3 +158,21 @@ class Interpreter(Visitor):
             return "nil"
         else:
             return str(thing)
+
+    def executeBlock(self, statements: List[Stmt], environment: Environment):
+        '''
+            Execute statements in passed 'environment'.
+            
+            Sets current environment to passed 'environment' and executes statements,
+            then restores previous environment
+        '''
+        previous = self.environment
+
+        try:
+            self.environment = environment
+
+            for statement in statements:
+                self.execute(statement)
+        
+        finally:
+            self.environment = previous
