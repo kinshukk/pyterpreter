@@ -8,7 +8,7 @@ declaration -> variableDeclaration | statement;
 
 variableDeclaration -> 'var' IDENTIFIER ('=' expression)? ';'
 
-statement -> expressionStatement | printStatement | block
+statement -> expressionStatement | printStatement | block | ifStatement | whileStatement
 
 printStatement -> 'print' expression ';'
 
@@ -16,13 +16,21 @@ expressionStatement -> expression ';'
 
 block -> '{' declaration '}'
 
+ifStatement -> 'if' '(' expression ')' statement ( 'else' statement )?
+
+whileStatement -> 'while' '(' expression ')' statement
+
 
 
 expression -> commaSeparated
 
 commaSeparated -> assignment ( "," assignment )*
 
-assignment -> IDENTIFIER '=' assignment | equality
+assignment -> IDENTIFIER '=' assignment | logic_or
+
+logic_or -> logic_and ( "or" logic_and )*
+
+logic_and -> equality ( "and" equality )*
 
 equality -> comparison ( ('!=' | '==') comparison )*
 

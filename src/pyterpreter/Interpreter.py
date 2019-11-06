@@ -76,6 +76,20 @@ class Interpreter(Visitor):
     def visitLiteralExpr(self, expr: Literal):
         return expr.value
 
+    def visitLogicalExpr(self, expr: Logical):
+        '''evaluates and/or expressions, with short circuiting'''
+        left = self.evaluate(expr.left)
+
+        if expr.operator.tokentype == TokenType.OR:
+            if self.truthyness(left):
+                return left
+        
+        elif expr.operator.tokentype == TokenType.AND:
+            if not self.truthyness(left):
+                return left
+
+        return self.evaluate(expr.right)
+
     def visitUnaryExpr(self, expr: Unary):
         right = self.evaluate(expr.right)
 
@@ -104,6 +118,17 @@ class Interpreter(Visitor):
         self.evaluate(stmt.expression)
         return None
 
+    def visitIfStmt(self, stmt: Stmt):
+        #Using if statements to evaluate if statement HAH
+        if self.truthyness(self.evaluate(stmt.condition)):
+            self.execute(stmt.thenBranch)
+        
+        elif stmt.elseBranch is not None:
+            self.execute(stmt.elseBranch)
+
+        else:
+            return None
+
     def visitPrintStmt(self, stmt: Stmt):
         value = self.evaluate(stmt.expression)
         print(self.stringify(value))
@@ -120,6 +145,12 @@ class Interpreter(Visitor):
         self.environment.define(stmt.name.lexeme, value)
         return None
 
+    def visitWhileStmt(self, stmt: Stmt):
+        while self.truthyness(self.evaluate(stmt.condition)):
+            self.execute(stmt.body)
+        
+        return None
+
     def visitVariableExpr(self, expr: Variable):
         return self.environment.get(expr.name)
 
@@ -134,6 +165,7 @@ class Interpreter(Visitor):
         '''
         if thing is None:
             return False
+        
         if isinstance(thing, bool):
             #why cast to bool if it's already instance of bool?
             return bool(thing)

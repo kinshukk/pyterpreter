@@ -92,9 +92,9 @@ class Parser:
 
     def assignment(self) -> Expr:
         '''
-            assignment -> IDENTIFIER '=' assignment | equality
+            assignment -> IDENTIFIER '=' assignment | logic_or
         '''
-        expr = self.equality()
+        expr = self.logic_or()
 
         if self.match([TokenType.EQUAL]):
             equals = self.previous()
@@ -106,6 +106,32 @@ class Parser:
             self.error(equals, "Invalid target for assignment")
 
         return expr
+
+    def logic_or(self) -> Expr:
+        '''
+            logic_or -> logic_and ( 'or' logic_and )*
+        '''
+        left = self.logic_and()
+
+        while self.match([TokenType.OR]):
+            operator = self.previous()
+            right = self.logic_and()
+            left = Logical(left, operator, right)
+
+        return left
+
+    def logic_and(self) -> Expr:
+        '''
+            logic_and -> equality ( 'and' equality )*
+        '''
+        left = self.equality()
+
+        while self.match([TokenType.AND]):
+            operator = self.previous()
+            right = self.equality()
+            left = Logical(left, operator, right)
+        
+        return left
 
     def equality(self) -> Expr:
         '''
@@ -287,13 +313,19 @@ class Parser:
 
     def statement(self) -> Stmt:
         '''
-            statement -> expressionStatement | printStatement | block
+            statement -> expressionStatement | printStatement | block | ifStatement | whileStatement
         '''
         if self.match([TokenType.PRINT]):
             return self.printStatement()
 
         elif self.match([TokenType.LEFT_BRACE]):
             return Block(self.block())
+
+        elif self.match([TokenType.IF]):
+            return self.ifStatement()
+
+        elif self.match([TokenType.WHILE]):
+            return self.whileStatement()
 
         else:
             return self.expressionStatement()
@@ -326,3 +358,32 @@ class Parser:
 
         self.consume(TokenType.RIGHT_BRACE, "Expected '}' after block")
         return declarations
+
+    def ifStatement(self) -> If:
+        '''
+            ifStatement -> 'if' '(' expression ')' statement ( 'else' statement )?
+
+            dangling 'else' is coupled with the innermost 'if'
+        '''
+        self.consume(TokenType.LEFT_PAREN, "Expected '(' after 'if'")
+        condition = self.expression()
+        self.consume(TokenType.RIGHT_PAREN, "Expected ')' after if condition")
+
+        #statement, not declaration, since statement covers nested if, blocks, print, expressions,
+        #but doesn't permit a variable declared without use inside the thenBranch
+        thenBranch = self.statement()
+        
+        elseBranch = None
+        if(self.match([TokenType.ELSE])):
+            elseBranch = self.statement()
+
+        return If(condition, thenBranch, elseBranch)
+
+    def whileStatement(self) -> While:
+        self.consume(TokenType.LEFT_PAREN, "Expected '(' after 'while'")
+        condition = self.expression()
+        self.consume(TokenType.RIGHT_PAREN, "Expected ')' after condition to match '('")
+
+        body = self.statement()
+
+        return While(condition, body)

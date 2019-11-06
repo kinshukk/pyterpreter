@@ -1,4 +1,5 @@
 import sys
+import argparse
 
 from ErrorHandler import *
 from scanner import *
@@ -28,9 +29,11 @@ class Preter:
         tokens = scanner.scanTokens()
 
         if debug:
+            print("\n")
             print("Tokens:")
             for token in tokens:
                 print(token)
+            print("\n\n")
 
         #self.printTokens(tokens)
 
@@ -45,9 +48,9 @@ class Preter:
 
         self.interpreter.interpret(statements)
 
-    def runFile(self, filename):
+    def runFile(self, filename, debug=False):
         with open(filename, mode='r', encoding='utf-8') as f:
-            self.run("".join(f.readlines()))
+            self.run("".join(f.readlines()), debug=debug)
             
             if self.error_handler.hadError:
                 sys.exit(65)
@@ -67,14 +70,17 @@ class Preter:
         except KeyboardInterrupt:
             print("\nKeyboardInterrupt")
 
-    def main(self):
+    def main(self, debug=False):
         if len(sys.argv[1:]) > 1:
             print("Usage: preter [script]")
         elif len(sys.argv[1:]) == 1:
-            self.runFile(sys.argv[1])
+            self.runFile(sys.argv[1], debug=debug)
         else:
-            self.runPrompt()
+            self.runPrompt(debug=debug)
 
 if __name__ == '__main__':
+    #parser = argparse.ArgumentParser(description="PyTerpreter: execute .pr files, or use the REPL")
+    #parser.add_argument
+
     interpreter = Preter()
-    interpreter.main()
+    interpreter.main(debug=False)

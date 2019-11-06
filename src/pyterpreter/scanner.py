@@ -135,7 +135,7 @@ class Scanner:
             self.advance()
 
         if self.peek() == '.' and self.peekNext().isdigit():
-            advance()
+            self.advance()
 
         while self.peek().isdigit():
             self.advance()
