@@ -20,11 +20,11 @@ Only two data types - numbers(all of which are floats) and strings
     >>> var b = 0.5;
     >>> print a + b;
     10.5
-    >>> var c = "Hello, Planet"
+    >>> var c = "Hello, Planet";
     >>> print c;
     Hello, Planet
     >>> var str = "talk to ";
-    >>> var hand = "the hand!"
+    >>> var hand = "the hand!";
     >>> print str + hand;
     talk to the hand!
     >>> print str + "the hand!";
@@ -34,10 +34,10 @@ Only two data types - numbers(all of which are floats) and strings
     var first = 5;
     var second = 10;
     if(first > second){
-	    print "oh no"
+	    print "oh no";
     }
     else{
-	    print "perfect"
+	    print "perfect";
     }
 
 ### Loops
