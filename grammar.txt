@@ -8,17 +8,19 @@ declaration -> variableDeclaration | statement;
 
 variableDeclaration -> 'var' IDENTIFIER ('=' expression)? ';'
 
-statement -> expressionStatement | printStatement | block | ifStatement | whileStatement
+statement -> expressionStatement | printStatement | block | ifStatement | whileStatement | forStatement
 
 printStatement -> 'print' expression ';'
 
 expressionStatement -> expression ';'
 
-block -> '{' declaration '}'
+block -> '{' declaration* }'
 
 ifStatement -> 'if' '(' expression ')' statement ( 'else' statement )?
 
 whileStatement -> 'while' '(' expression ')' statement
+
+forStatement -> 'for' '(' ( variableDeclaration | expressionStatement | ';' ) expression? ';' expression? ')' statement
 
 
 

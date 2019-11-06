@@ -313,7 +313,7 @@ class Parser:
 
     def statement(self) -> Stmt:
         '''
-            statement -> expressionStatement | printStatement | block | ifStatement | whileStatement
+            statement -> expressionStatement | printStatement | block | ifStatement | whileStatement | forStatement
         '''
         if self.match([TokenType.PRINT]):
             return self.printStatement()
@@ -326,6 +326,9 @@ class Parser:
 
         elif self.match([TokenType.WHILE]):
             return self.whileStatement()
+
+        elif self.match([TokenType.FOR]):
+            return self.forStatement()
 
         else:
             return self.expressionStatement()
@@ -387,3 +390,55 @@ class Parser:
         body = self.statement()
 
         return While(condition, body)
+
+    def forStatement(self) -> Stmt:
+        self.consume(TokenType.LEFT_PAREN, "Expected '(' after for")
+
+        #parse initializer
+        if self.match([TokenType.SEMICOLON]):
+            initializer = None
+        elif self.match([TokenType.VAR]):
+            initializer = self.varDeclaration()
+        else:
+            initializer = self.expressionStatement()
+
+        #condition
+        if not self.check(TokenType.SEMICOLON):
+            #If condition is not empty
+            condition = self.expression()
+        else:
+            condition = None
+
+        self.consume(TokenType.SEMICOLON, "Expected ';' after loop condition")
+
+        #increment expression
+        if not self.check(TokenType.RIGHT_PAREN):
+            #incrementing expression not empty
+            increment = self.expression()
+        else:
+            increment = None
+
+        self.consume(TokenType.RIGHT_PAREN, "Expected closing ')' after for clauses")
+
+        body = self.statement()
+
+
+        #make an equivalent while loop, with initializer before the loop, 
+        #and increment at the end of loop body
+
+        if increment is not None:
+            body = Block([
+                body,
+                increment
+            ])
+
+        if condition is not None:
+            body = While(condition, body)
+
+        if initializer is not None:
+            body = Block([
+                initializer,
+                body
+            ])
+
+        return body
