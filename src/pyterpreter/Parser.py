@@ -190,14 +190,44 @@ class Parser:
 
     def unary(self) -> Expr:
         '''
-            unary -> ( '!' | '-' ) unary | primary
+            unary -> ( '!' | '-' ) unary | functionCall
         '''
         if self.match([TokenType.BANG, TokenType.MINUS]):
             operator = self.previous()
             right = self.unary()
             return Unary(operator, right)
-        else:
-            return self.primary()
+        
+        return self.functionCall()
+
+    def functionCall(self):
+        '''
+            functionCall -> primary ( '(' arguments ')' )*
+        '''
+        expr = self.primary()
+
+        while True:
+            if self.match([TokenType.LEFT_PAREN]):
+                expr = self.finishCall(expr)
+            else:
+                break
+
+        return expr
+
+    def finishCall(self, callee):
+        arguments = []
+
+        if not self.check(TokenType.RIGHT_PAREN):
+            while True:
+                if len(arguments) > 255:
+                    self.error(self.peek(), "Why do you need more than 255 arguments anyway?")
+                arguments.append(self.expression)
+
+                if not self.match([TokenType.COMMA]):
+                    break
+
+        paren = self.consume(TokenType.RIGHT_PAREN, "Expected ')'")
+
+        return CallFunction(callee, arguments, paren)
 
     def consume(self, type_: TokenType, message: str) -> Token:
         '''

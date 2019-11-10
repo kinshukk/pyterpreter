@@ -106,6 +106,7 @@ def main():
               [
                 "Assign | name, value",
                 "Binary | left, operator, right",
+                "CallFunction | callee, arguments, parenLoc",
                 "Grouping | expression",
                 "Literal | value",
                 "Logical | left, operator, right",

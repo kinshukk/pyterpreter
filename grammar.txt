@@ -42,7 +42,9 @@ addition -> multiplication ( ( '+' | '-' ) multiplication )*
 
 multiplication -> unary ( ( '/' | '-' ) unary )*
 
-unary -> ( '!' | '-' ) unary | primary
+unary -> ( '!' | '-' ) unary | functionCall
+
+functionCall -> primary ( '(' arguments? ')' )*
 
 primary -> NUMBER
          | STRING
@@ -51,3 +53,5 @@ primary -> NUMBER
          | "nil"
          | "(" commaSeparated ")"
          | IDENTIFIER
+
+arguments -> expression ( ',' expression )*

@@ -1,4 +1,5 @@
 from typing import List
+from time import time
 
 from Expr import *
 from Stmt import *
@@ -7,11 +8,30 @@ from TokenType import *
 from ErrorHandler import *
 from RuntimeError_ import *
 from Environment import *
+from Callable import Callable
 
 class Interpreter(Visitor):
     def __init__(self, error_handler: ErrorHandler):
         self.error_handler = error_handler
-        self.environment = Environment()
+        self.globals = Environment()
+        self.environment = self.globals
+
+        class Clock(Callable):
+            def __init__(self):
+                super().__init__()
+                self.start_t = time()
+
+            def arity(self):
+                return 0;
+
+            def call(self, interpreter, arguments):
+                #time passed since start of interpreter
+                return time() - self.start_t
+
+            def __str__(self):
+                return f"<Native Function 'clock'>"
+
+        self.globals.define("clock", Clock())
 
     def visitBinaryExpr(self, expr: Binary):
         left = self.evaluate(expr.left)
@@ -109,6 +129,18 @@ class Interpreter(Visitor):
         self.environment.assign(expr.name, value)
         return value
 
+    def visitCallFunctionExpr(self, expr: CallFunction):
+        callee = self.evaluate(expr.callee)
+
+        if not isinstance(callee, Callable):
+            raise RuntimeError_(expr.paren, "Can only use call syntax on functions and classes")
+
+        arguments = [self.evaluate(arg) for arg in expr.arguments]
+        
+        if callee.arity() != len(arguments):
+            raise RuntimeError(expr.paren, f"Expected {callee.arity()} arguments but got {len(arguments)}")
+
+        return callee.call(self, arguments)
 
     def visitBlockStmt(self, stmt: Stmt):
         self.executeBlock(stmt.statements, Environment(enclosing=self.environment))
