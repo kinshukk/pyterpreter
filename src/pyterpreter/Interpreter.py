@@ -9,6 +9,7 @@ from ErrorHandler import *
 from RuntimeError_ import *
 from Environment import *
 from Callable import Callable
+from FunctionCallable import FunctionCallable
 
 class Interpreter(Visitor):
     def __init__(self, error_handler: ErrorHandler):
@@ -135,10 +136,11 @@ class Interpreter(Visitor):
         if not isinstance(callee, Callable):
             raise RuntimeError_(expr.paren, "Can only use call syntax on functions and classes")
 
+        #args evaluated Left to Right
         arguments = [self.evaluate(arg) for arg in expr.arguments]
-        
+
         if callee.arity() != len(arguments):
-            raise RuntimeError(expr.paren, f"Expected {callee.arity()} arguments but got {len(arguments)}")
+            raise RuntimeError(expr.parenLoc, f"Expected {callee.arity()} arguments but got {len(arguments)}")
 
         return callee.call(self, arguments)
 
@@ -148,6 +150,11 @@ class Interpreter(Visitor):
 
     def visitExpressionStmt(self, stmt: Stmt):
         self.evaluate(stmt.expression)
+        return None
+
+    def visitFunctionStmt(self, stmt: Function):
+        function = FunctionCallable(stmt)
+        self.environment.define(stmt.name.lexeme, function)
         return None
 
     def visitIfStmt(self, stmt: Stmt):
@@ -225,7 +232,7 @@ class Interpreter(Visitor):
 
     def executeBlock(self, statements: List[Stmt], environment: Environment):
         '''
-            Execute statements in passed 'environment'.
+            Execute statements from block in passed 'environment'.
             
             Sets current environment to passed 'environment' and executes statements,
             then restores previous environment

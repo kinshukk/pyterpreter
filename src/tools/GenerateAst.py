@@ -121,6 +121,7 @@ def main():
               [
                   "Block | statements",
                   "Expression | expression",
+                  "Function | name, params, body",
                   "If | condition, thenBranch, elseBranch",
                   "Print | expression",
                   "Var | name, initializer",

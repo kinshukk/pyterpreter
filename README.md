@@ -4,13 +4,13 @@ A tree-walk interpreter for a toy language, written in good ol' Python.
 
 To fire up the REPL:
 
-    $ python3  src/preter.py
+    $ python3  src/pyterpreter/preter.py
     >>> var a = 10;
     >>> print var;
     10.0
 To execute a file, add an argument for the file's location:
 
-    $ python3 src/preter.py samples/print_somethings.pr
+    $ python3 src/pyterpreter/preter.py samples/print_somethings.pr
 
 ## Things that work right now
 ### Variables

@@ -220,7 +220,8 @@ class Parser:
             while True:
                 if len(arguments) > 255:
                     self.error(self.peek(), "Why do you need more than 255 arguments anyway?")
-                arguments.append(self.expression)
+                #assignment instead of expression, otherwise comma operator gets parsed first
+                arguments.append(self.assignment())
 
                 if not self.match([TokenType.COMMA]):
                     break
@@ -314,11 +315,15 @@ class Parser:
 
     def declaration(self) -> Stmt:
         '''
-            declaration -> variableDeclaration | statement;
+            declaration -> variableDeclaration | functionDeclaration | statement
+
+            functionDeclaration -> 'fun' function
         '''
         try:
             if self.match([TokenType.VAR]):
                 return self.varDeclaration()
+            elif self.match([TokenType.FUN]):
+                return self.function(kind="function")
             else:
                 return self.statement()
         except Parser.ParseError as e:
@@ -340,6 +345,33 @@ class Parser:
         self.consume(TokenType.SEMICOLON, "Expected ';' after variable declaration")
 
         return Var(name, initializer)
+
+    def function(self, kind) -> Stmt:
+        '''
+            function -> IDENTIFIER '(' parameters? ')' block
+        '''
+        name = self.consume(TokenType.IDENTIFIER, f"Expected {kind} name")
+
+        parameters = []
+        self.consume(TokenType.LEFT_PAREN, f"Expected '(' after {kind} name")
+        
+        if not self.check(TokenType.RIGHT_PAREN):
+            while True:
+                if len(parameters) > 255:
+                    self.error(self.peek(), f"Don't wanna have more than 255 parameters to a {kind}")
+
+                parameters.append(self.consume(TokenType.IDENTIFIER, "Expected identifier"))
+
+                if not self.match([TokenType.COMMA]):
+                    break
+        
+        self.consume(TokenType.RIGHT_PAREN, f"Expected ')' after {kind} parameters")
+
+        #double {{ to escape single { in f-string
+        self.consume(TokenType.LEFT_BRACE, f"Expected '{{' before {kind} body")
+        body = self.block()
+
+        return Function(name, parameters, body)
 
     def statement(self) -> Stmt:
         '''
@@ -383,6 +415,8 @@ class Parser:
     def block(self) -> List[Stmt]:
         '''
             block -> '{' declaration* '}'
+
+            assume '{' is already consumed
         '''
         declarations = []
 

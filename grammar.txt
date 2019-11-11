@@ -2,13 +2,19 @@
 
 program -> declaration* EOF
 
-declaration -> variableDeclaration | statement;
+declaration -> variableDeclaration | functionDeclaration | statement;
 
 
 
 variableDeclaration -> 'var' IDENTIFIER ('=' expression)? ';'
 
+functionDeclaration -> 'fun' function
+
 statement -> expressionStatement | printStatement | block | ifStatement | whileStatement | forStatement
+
+function -> IDENTIFIER '(' parameters? ')' block
+
+parameters -> IDENTIFIER ( ',' IDENTIFIER)*
 
 printStatement -> 'print' expression ';'
 
