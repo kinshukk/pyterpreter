@@ -47,7 +47,7 @@ Only two data types - numbers(all of which are floats) and strings
 	    print c;
     }
     
-    for(int i=16; i>=1; i = i / 2){
+    for(var i=16; i>=1; i = i / 2){
 	    print i;
     }
 #
