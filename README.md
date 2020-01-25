@@ -1,5 +1,5 @@
 
-# pyterpreter (WIP)
+# pyterpreter
 A tree-walk interpreter for a toy language, written in good ol' Python.
 
 To fire up the REPL:
